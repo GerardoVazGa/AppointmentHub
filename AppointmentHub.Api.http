@@ -1,0 +1,9 @@
+POST http://localhost:5180/api/services
+Content-Type: application/json
+
+{
+  "name": "Corte de cabello",
+  "durationMinutes": 30,
+  "price": 150
+}
+###
