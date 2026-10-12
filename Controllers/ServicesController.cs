@@ -54,5 +54,18 @@ public class ServicesController : ControllerBase {
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id) {
+        var service = await _db.Services.FindAsync(id);
+
+        if(service is null) {
+            return NotFound();
+        }
+
+        _db.Services.Remove(service);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 }
 
