@@ -21,11 +21,38 @@ public class ServicesController : ControllerBase {
         return services;
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Service>> GetById(int id) {
+        var service = await _db.Services.FindAsync(id);
+
+        if(service is null) {
+            return NotFound();
+        }
+
+        return service;
+    }
+
     [HttpPost]
     public async Task<ActionResult<Service>> Create(Service service) {
         _db.Services.Add(service);
         await _db.SaveChangesAsync();
         return Ok(service);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<Service>> Update(int id, Service updated) {
+        var service = await _db.Services.FindAsync(id);
+
+        if(service is null) {
+            return NotFound();
+        }
+
+        service.Name = updated.Name;
+        service.DurationMinutes = updated.DurationMinutes;
+        service.price = updated.price;
+
+        await _db.SaveChangesAsync();
+        return NoContent();
     }
 }
 
