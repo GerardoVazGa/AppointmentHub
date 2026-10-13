@@ -16,6 +16,21 @@ public class BookingsController : ControllerBase {
         _db = db;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<List<Booking>>> GetAll(DateOnly? date) {
+        var query = _db.Bookings
+            .Include(booking => booking.Service).AsQueryable();
+
+        if(date is not null) {
+            var startOfDay = date.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var endOfDay = startOfDay.AddDays(1);
+
+            query = query.Where(booking => booking.StartTime >= startOfDay && booking.EndTime <= endOfDay);
+        }
+        
+        return await query.ToListAsync();
+    }
+
     [HttpPost]
     public async Task<ActionResult<Booking>> Create(CreateBookingsRequest request) {
         var service = await _db.Services.FindAsync(request.ServiceId);
