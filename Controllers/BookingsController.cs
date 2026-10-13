@@ -24,11 +24,23 @@ public class BookingsController : ControllerBase {
             return NotFound();
         }
 
+        var startTimeNewBooking = request.StartTime;
+        var endTimeNewBooking = request.StartTime.AddMinutes(service.DurationMinutes);
+
+        var hasOverlappingBooking = await _db.Bookings.AnyAsync(booking => 
+            startTimeNewBooking < booking.EndTime && endTimeNewBooking > booking.StartTime
+
+        );
+
+        if(hasOverlappingBooking) {
+            return Conflict("That time slot is already booked.");
+        }
+
         var booking = new Booking {
             CustomerName = request.CustomerName,
             ServiceId = service.Id,
-            StartTime = request.StartTime,
-            EndTime = request.StartTime.AddMinutes(service.DurationMinutes)
+            StartTime = startTimeNewBooking,
+            EndTime = endTimeNewBooking
         };
 
         _db.Bookings.Add(booking);
