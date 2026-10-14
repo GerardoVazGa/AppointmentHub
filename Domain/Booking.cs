@@ -8,4 +8,5 @@ public class Booking {
 
     public int ServiceId { get; set; }
     public Service? Service { get; set; }
+    public BookingStatus Status { get; set; } = BookingStatus.Confirmed;
 }
