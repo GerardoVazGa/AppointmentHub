@@ -43,6 +43,7 @@ public class BookingsController : ControllerBase {
         var endTimeNewBooking = request.StartTime.AddMinutes(service.DurationMinutes);
 
         var hasOverlappingBooking = await _db.Bookings.AnyAsync(booking => 
+            booking.Status == BookingStatus.Confirmed &&
             startTimeNewBooking < booking.EndTime && endTimeNewBooking > booking.StartTime
 
         );
@@ -63,6 +64,26 @@ public class BookingsController : ControllerBase {
 
         return Ok(booking);
     }
+
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> Cancel(int id) {
+        var booking = await _db.Bookings.FindAsync(id);
+
+        if(booking is null) {
+            return NotFound();
+        }
+
+        if(booking.Status == BookingStatus.Cancelled) {
+            return Conflict("Booking is already cancelled.");
+        }
+
+        booking.Status = BookingStatus.Cancelled;
+
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
 }
 
 
