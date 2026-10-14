@@ -76,6 +76,28 @@ namespace AppointmentHub.Api.Migrations
                     b.ToTable("Services");
                 });
 
+            modelBuilder.Entity("AppointmentHub.Api.Domain.WorkingHours", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WorkingHours");
+                });
+
             modelBuilder.Entity("AppointmentHub.Api.Domain.Booking", b =>
                 {
                     b.HasOne("AppointmentHub.Api.Domain.Service", "Service")

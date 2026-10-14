@@ -8,4 +8,5 @@ public class AppDbContext : DbContext {
 
     public DbSet<Service> Services => Set<Service>();
     public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<WorkingHours> WorkingHours => Set<WorkingHours>();
 }
