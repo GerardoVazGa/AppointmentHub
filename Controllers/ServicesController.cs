@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppointmentHub.Api.Controllers;
 
+public record CreateServiceRequest(string Name, int DurationMinutes, decimal Price);
+
 [ApiController]
 [Route("api/[controller]")]
 
@@ -33,14 +35,37 @@ public class ServicesController : ControllerBase {
     }
 
     [HttpPost]
-    public async Task<ActionResult<Service>> Create(Service service) {
+    public async Task<ActionResult<Service>> Create(CreateServiceRequest request) {
+        if(string.IsNullOrWhiteSpace(request.Name)) {
+            return BadRequest("Service name cannot be empty.");
+            
+        }
+
+        var service = new Service {
+            Name = request.Name,
+            DurationMinutes = request.DurationMinutes,
+            Price = request.Price
+        };
         _db.Services.Add(service);
         await _db.SaveChangesAsync();
         return Ok(service);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Service>> Update(int id, Service updated) {
+    public async Task<ActionResult<Service>> Update(int id, CreateServiceRequest updated) {
+
+        if(string.IsNullOrWhiteSpace(updated.Name)) {
+            return BadRequest("Service name cannot be empty.");
+        }
+
+        if(updated.DurationMinutes < 0) {
+            return BadRequest("Duration must be greater than 0.");
+        }
+
+        if(updated.Price < 0) {
+            return BadRequest("Price must be greater than 0.");
+        }
+
         var service = await _db.Services.FindAsync(id);
 
         if(service is null) {
@@ -49,7 +74,7 @@ public class ServicesController : ControllerBase {
 
         service.Name = updated.Name;
         service.DurationMinutes = updated.DurationMinutes;
-        service.price = updated.price;
+        service.Price = updated.Price;
 
         await _db.SaveChangesAsync();
         return NoContent();
