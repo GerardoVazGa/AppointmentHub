@@ -68,7 +68,7 @@ namespace AppointmentHub.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("price")
+                    b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
