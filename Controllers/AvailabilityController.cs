@@ -42,22 +42,13 @@ public class AvailabilityController : ControllerBase {
 
         var duration = TimeSpan.FromMinutes(service.DurationMinutes);
 
-        var slots = new List<DateTime>();
-
-        for(var startAt = dayStart; startAt + duration <= dayEnd; startAt +=duration) {
-            var endAt = startAt + duration;
-            var taken = bookings.Any(booking => startAt< booking.EndTime && endAt > booking.StartTime);
-
-            if(!taken) {
-                slots.Add(startAt);
-            }
-        }
+        var availableStartTimes = AvailabilityCalculator.CalculateAvailableSlots(dayStart, dayEnd, duration, bookings);
 
         return Ok(new {
             date,
             isOpen = true,
             service = service.Name,
-            slots
+            availableStartTimes
         });
 
     }
