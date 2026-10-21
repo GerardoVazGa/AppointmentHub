@@ -2,11 +2,13 @@ using AppointmentHub.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using AppointmentHub.Api.Domain;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppointmentHub.Api.Controllers;
 
 public record WorkingHoursRequest(DayOfWeek DayOfWeek, TimeOnly StartTime, TimeOnly EndTime);
 
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/working-hours")]
 public class WorkingHoursController : ControllerBase {

@@ -2,6 +2,7 @@ using AppointmentHub.Api.Data;
 using AppointmentHub.Api.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppointmentHub.Api.Controllers;
 
@@ -34,6 +35,7 @@ public class ServicesController : ControllerBase {
         return service;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<Service>> Create(CreateServiceRequest request) {
         if(string.IsNullOrWhiteSpace(request.Name)) {
@@ -51,6 +53,7 @@ public class ServicesController : ControllerBase {
         return Ok(service);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<ActionResult<Service>> Update(int id, CreateServiceRequest updated) {
 
@@ -80,6 +83,7 @@ public class ServicesController : ControllerBase {
         return NoContent();
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id) {
         var service = await _db.Services.FindAsync(id);
