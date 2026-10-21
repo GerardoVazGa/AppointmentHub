@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppointmentHub.Api.Controllers;
 
@@ -109,6 +110,20 @@ public class AuthController : ControllerBase {
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult GetMe() {
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var email = User.FindFirstValue(ClaimTypes.Email)!;
+        var role = User.FindFirstValue(ClaimTypes.Role)!;
+
+        return Ok(new {
+            Id = id,
+            Email = email,
+            Role = role
+        });
     }
 
 
