@@ -9,6 +9,8 @@ namespace AppointmentHub.Api.Controllers;
 
 public record CreateBookingsRequest(int ServiceId, DateTime StartTime); 
 
+public record BookingResponse(int Id, string CustomerName, int ServiceId, string? ServiceName, int? UserId, DateTime StartTime, DateTime EndTime, BookingStatus Status);
+
 [ApiController]
 [Route("api/[controller]")]
 public class BookingsController : ControllerBase {
@@ -19,7 +21,7 @@ public class BookingsController : ControllerBase {
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Booking>>> GetAll(DateOnly? date) {
+    public async Task<ActionResult<List<BookingResponse>>> GetAll(DateOnly? date) {
         var query = _db.Bookings
             .Include(booking => booking.Service).AsQueryable();
 
@@ -29,8 +31,10 @@ public class BookingsController : ControllerBase {
 
             query = query.Where(booking => booking.StartTime >= startOfDay && booking.EndTime <= endOfDay);
         }
+
+        var bookings = await query.OrderBy(b => b.StartTime).ToListAsync();
         
-        return await query.ToListAsync();
+        return bookings.Select(ToResponse).ToList();
     }
 
     [Authorize]
@@ -78,7 +82,20 @@ public class BookingsController : ControllerBase {
         _db.Bookings.Add(booking);
         await _db.SaveChangesAsync();
 
-        return Ok(booking);
+        return Ok(ToResponse(booking));
+    }
+
+    private static BookingResponse ToResponse(Booking booking) {
+        return new BookingResponse (
+            booking.Id,
+            booking.CustomerName,
+            booking.ServiceId,
+            booking.Service?.Name,
+            booking.UserId,
+            booking.StartTime,
+            booking.EndTime,
+            booking.Status
+        );
     }
 
     [HttpPost("{id}/cancel")]
