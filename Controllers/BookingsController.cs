@@ -2,10 +2,12 @@ using AppointmentHub.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using AppointmentHub.Api.Domain;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppointmentHub.Api.Controllers;
 
-public record CreateBookingsRequest(string CustomerName, int ServiceId, DateTime StartTime); 
+public record CreateBookingsRequest(int ServiceId, DateTime StartTime); 
 
 [ApiController]
 [Route("api/[controller]")]
@@ -31,8 +33,21 @@ public class BookingsController : ControllerBase {
         return await query.ToListAsync();
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<Booking>> Create(CreateBookingsRequest request) {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if(!int.TryParse(userIdValue, out var userId)) {
+            return Unauthorized();
+        }
+
+        var user = await _db.Users.FindAsync(userId);
+
+        if(user is null) {
+            return Unauthorized();
+        }
+
         var service = await _db.Services.FindAsync(request.ServiceId);
 
         if(service is null) {
@@ -53,7 +68,8 @@ public class BookingsController : ControllerBase {
         }
 
         var booking = new Booking {
-            CustomerName = request.CustomerName,
+            CustomerName = user.Name,
+            UserId = user.Id,
             ServiceId = service.Id,
             StartTime = startTimeNewBooking,
             EndTime = endTimeNewBooking
