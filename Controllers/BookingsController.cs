@@ -20,10 +20,21 @@ public class BookingsController : ControllerBase {
         _db = db;
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<List<BookingResponse>>> GetAll(DateOnly? date) {
         var query = _db.Bookings
             .Include(booking => booking.Service).AsQueryable();
+
+        if(!User.IsInRole(UserRole.Admin.ToString())) {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if(!int.TryParse(userIdValue, out var userId)) {
+                return Unauthorized();
+            }
+
+            query = query.Where(booking => booking.UserId == userId);
+        }
 
         if(date is not null) {
             var startOfDay = date.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
