@@ -1,9 +1,85 @@
-POST http://localhost:5180/api/services
+@baseUrl = http://localhost:5180
+
+### Register a customer
+POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
-  "name": "Corte de cabello",
+  "name": "Luis Pérez",
+  "email": "luis@example.com",
+  "password": "password123"
+}
+
+### Login as customer
+# @name loginCustomer
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "luis@example.com",
+  "password": "password123"
+}
+
+### Login as admin (promote this user in the database first, see README)
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "password": "password123"
+}
+
+### Who am I
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### Create a service (admin)
+POST {{baseUrl}}/api/services
+Content-Type: application/json
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+{
+  "name": "Haircut",
   "durationMinutes": 30,
   "price": 150
 }
-###
+
+### Create business hours (admin)
+POST {{baseUrl}}/api/working-hours
+Content-Type: application/json
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+{
+  "dayOfWeek": "Monday",
+  "startTime": "09:00:00",
+  "endTime": "17:00:00"
+}
+
+### List services
+GET {{baseUrl}}/api/services
+
+### Check availability
+GET {{baseUrl}}/api/availability?serviceId=1&date=2026-11-02
+
+### Create a booking (customer)
+POST {{baseUrl}}/api/bookings
+Content-Type: application/json
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+{
+  "serviceId": 1,
+  "startsAt": "2026-11-02T09:00:00Z"
+}
+
+### List my bookings (customer)
+GET {{baseUrl}}/api/bookings
+Authorization: Bearer {{loginCustomer.response.body.token}}
+
+### List all bookings (admin)
+GET {{baseUrl}}/api/bookings
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+### Cancel a booking
+POST {{baseUrl}}/api/bookings/1/cancel
+Authorization: Bearer {{loginCustomer.response.body.token}}
