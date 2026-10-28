@@ -109,12 +109,21 @@ public class BookingsController : ControllerBase {
         );
     }
 
+    [Authorize]
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> Cancel(int id) {
         var booking = await _db.Bookings.FindAsync(id);
 
         if(booking is null) {
             return NotFound();
+        }
+
+        if(!User.IsInRole(UserRole.Admin.ToString())) {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if(!int.TryParse(userIdValue, out var userId) || booking.UserId != userId) {
+                return Forbid();
+            }
         }
 
         if(booking.Status == BookingStatus.Cancelled) {
